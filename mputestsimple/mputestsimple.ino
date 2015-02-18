@@ -72,7 +72,6 @@ void setup() {
 }
 
 void loop() {
-    delay(100);
     if (accelgyro.testConnection()) {
         // read raw accel/gyro measurements from device
         accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);

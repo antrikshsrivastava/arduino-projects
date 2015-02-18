@@ -20,15 +20,20 @@
 #include <Mirf.h>
 #include <nRF24L01.h>
 #include <MirfHardwareSpiDriver.h>
+#include <NewPing.h>
 
-int LED = 10;
+#define TRIGGER_PIN  3
+#define ECHO_PIN     4
+#define MAX_DISTANCE 200
+
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
 void setup(){
   Serial.begin(9600);
   /*
    * Setup pins / SPI.
    */
-
+   
   /* To change CE / CSN Pins:
    * 
    * Mirf.csnPin = 9;
@@ -36,30 +41,30 @@ void setup(){
    */
   /*
   Mirf.cePin = 7;
-   Mirf.csnPin = 8;
-   */
+  Mirf.csnPin = 8;
+  */
   Mirf.spi = &MirfHardwareSpi;
   Mirf.init();
-
+  
   /*
    * Configure reciving address.
    */
-
+   
   Mirf.setRADDR((byte *)"clie1");
-
+  
   /*
    * Set the payload length to sizeof(unsigned long) the
    * return type of millis().
    *
    * NB: payload on client and server must be the same.
    */
-
+   
   Mirf.payload = sizeof(unsigned long);
-
+  
   /*
    * Write channel and payload config then power up reciver.
    */
-
+   
   /*
    * To change channel:
    * 
@@ -67,33 +72,39 @@ void setup(){
    *
    * NB: Make sure channel is legal in your area.
    */
-
+   
   Mirf.config();
-
-  pinMode(LED, OUTPUT);
+  
   Serial.println("Beginning ... "); 
 }
 
 void loop(){
-  unsigned long data;
+  unsigned int uS = sonar.ping();
+  unsigned long time = millis();
+  
   Mirf.setTADDR((byte *)"serv1");
+  
+  Mirf.send((byte *)&uS);
+  
+  while(Mirf.isSending()){
+  }
+  Serial.println("Finished sending");
+  delay(10);
   while(!Mirf.dataReady()){
+    //Serial.println("Waiting");
+    if ( ( millis() - time ) > 1000 ) {
+      Serial.println("Timeout on response from server!");
+      return;
+    }
   }
-  Serial.println("GOT DATA: "); 
-  Mirf.getData((byte *) &data);
-  float cm = data/100.0;
-  Serial.println(cm);
-
-  if (cm > 160) {
-    digitalWrite(LED, HIGH);  
-  } 
-  else {
-    digitalWrite(LED, LOW);  
-  }
-  delay(100);
+  
+  Mirf.getData((byte *) &time);
+  
+  Serial.print("Ping: ");
+  Serial.println((millis() - time));
+  
+  delay(1000);
 } 
-
-
-
-
-
+  
+  
+  

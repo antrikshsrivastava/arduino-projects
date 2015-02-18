@@ -60,19 +60,19 @@ void setup() {
     Serial.begin(38400);
 
     // initialize device
-    Serial.println("Initializing I2C devices...");
+    //Serial.println("Initializing I2C devices...");
     accelgyro.initialize();
 
     // verify connection
-    Serial.println("Testing device connections...");
-    Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+    //Serial.println("Testing device connections...");
+    //Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
 
     // configure Arduino LED for
     pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
-    delay(100);
+  delay(100);
     if (accelgyro.testConnection()) {
         // read raw accel/gyro measurements from device
         accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
@@ -81,15 +81,35 @@ void loop() {
         //accelgyro.getAcceleration(&ax, &ay, &az);
         //accelgyro.getRotation(&gx, &gy, &gz);
     
+        String roll = (String)ax;
+        String pitch = (String)ay;
+        /*        
+        if (roll.length() < 5) {
+          int tempRoll = roll.length();
+          for (int i = 0; i < 5 - tempRoll; i++) {
+            roll = "0" + roll;  
+          }
+        }
+
+        if (pitch.length() < 5) {
+          int tempPitch = pitch.length();
+          for (int j = 0; j < 5 - tempPitch; j++) {
+            pitch = "0" + pitch;  
+          }
+        }        
+        */
+        
         // display tab-separated accel/gyro x/y/z values
-        Serial.print("a/g:\t");
-        Serial.print(ax); Serial.print("\t");
-        Serial.print(ay); Serial.print("\t");
-        Serial.print(az); Serial.print("\t");
-        Serial.print(gx); Serial.print("\t");
-        Serial.print(gy); Serial.print("\t");
+        //Serial.print("a/g:\t");
+        Serial.print(roll); Serial.print(",");
+        Serial.print(pitch); Serial.print(",");
+        Serial.println(accelgyro.getTemperature());
+        /*Serial.print(",");
+        Serial.print(az); Serial.print(",");
+        Serial.print(gx); Serial.print(",");
+        Serial.print(gy); Serial.print(",");
         Serial.println(gz);
-    
+        */
         // blink LED to indicate activity
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);
